@@ -1,16 +1,20 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-%hookf(id, objc_getClass("YTIShareEntityEndpoint"), @selector(shareEntityEndpoint)) {
-    return nil;
-}
-
 %hook YTIShareEntityEndpoint
+
 + (id)shareEntityEndpoint {
     return nil;
 }
+
 %end
 
 %ctor {
-    %init(YTIShareEntityEndpoint = objc_getClass("YTIShareEntityEndpoint"));
+    Class targetClass = objc_getClass("YTIShareEntityEndpoint");
+    
+    if (targetClass) {
+        %init(YTIShareEntityEndpoint = targetClass);
+    } else {
+        NSLog(@"[ShareFix] YTIShareEntityEndpoint không tồn tại, bỏ qua hook.");
+    }
 }
