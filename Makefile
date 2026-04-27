@@ -25,6 +25,7 @@ endif
 ifndef UYOU_VERSION
 UYOU_VERSION = 3.0.4
 endif
+
 PACKAGE_NAME = $(TWEAK_NAME)
 PACKAGE_VERSION = $(YOUTUBE_VERSION)-$(UYOU_VERSION)
 
@@ -65,10 +66,12 @@ $(TWEAK_NAME)_EMBED_BUNDLES = $(wildcard Bundles/*.bundle)
 $(TWEAK_NAME)_EMBED_EXTENSIONS = $(wildcard Extensions/*.appex)
 
 include $(THEOS)/makefiles/common.mk
+
 ifneq ($(JAILBROKEN),1)
 SUBPROJECTS += Tweaks/Alderis Tweaks/DontEatMyContent Tweaks/FLEXing/libflex Tweaks/iSponsorBlock Tweaks/Return-YouTube-Dislikes Tweaks/YTABConfig Tweaks/YouGroupSettings Tweaks/YTIcons Tweaks/YouLoop Tweaks/YouMute Tweaks/YouPiP Tweaks/YouQuality Tweaks/YouSlider Tweaks/YouSpeed Tweaks/YouTimeStamp Tweaks/YTHoldForSpeed Tweaks/YTUHD Tweaks/YTVideoOverlay Tweaks/YTweaks ShareFix
 include $(THEOS_MAKE_PATH)/aggregate.mk
 endif
+
 include $(THEOS_MAKE_PATH)/tweak.mk
 
 REMOVE_EXTENSIONS = 1
@@ -85,4 +88,20 @@ internal-clean::
 ifneq ($(JAILBROKEN),1)
 before-all::
 	@if [[ ! -f $(UYOU_DEB) ]]; then \
-		rm -
+		rm -rf $(UYOU_PATH)/*; \
+		$(PRINT_FORMAT_BLUE) "Downloading uYou"; \
+	fi
+before-all::
+	@if [[ ! -f $(UYOU_DEB) ]]; then \
+		curl -s -L "https://www.dropbox.com/scl/fi/01vvu5lm8nkkicrznku9v/com.miro.uyou_$(UYOU_VERSION)_iphoneos-arm.deb?rlkey=efgz7po8kqqvha8doplk1s3ky&dl=1" -o $(UYOU_DEB); \
+	fi; \
+	if [[ ! -f $(UYOU_DYLIB) || ! -d $(UYOU_BUNDLE) ]]; then \
+		tar -xf Tweaks/uYou/com.miro.uyou_$(UYOU_VERSION)_iphoneos-arm.deb -C Tweaks/uYou; tar -xf Tweaks/uYou/data.tar* -C Tweaks/uYou; \
+		if [[ ! -f $(UYOU_DYLIB) || ! -d $(UYOU_BUNDLE) ]]; then \
+			$(PRINT_FORMAT_ERROR) "Failed to extract uYou"; exit 1; \
+		fi; \
+	fi;
+else
+before-package::
+	@mkdir -p $(THEOS_STAGING_DIR)/Library/Application\ Support; cp -r Localizations/uYouPlus.bundle $(THEOS_STAGING_DIR)/Library/Application\ Support/
+endif
