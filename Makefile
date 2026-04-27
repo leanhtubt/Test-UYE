@@ -10,12 +10,8 @@ export Alderis_XCODEOPTS = LD_DYLIB_INSTALL_NAME=@rpath/Alderis.framework/Alderi
 export Alderis_XCODEFLAGS = DYLIB_INSTALL_NAME_BASE=/Library/Frameworks BUILD_LIBRARY_FOR_DISTRIBUTION=YES ARCHS="$(ARCHS)"
 export libcolorpicker_LDFLAGS = -F$(TARGET_PRIVATE_FRAMEWORK_PATH) -install_name @rpath/libcolorpicker.dylib
 
-
-# ---------------- Fix headers / YouSpeed ----------------
-export ADDITIONAL_CFLAGS = \
--I$(THEOS_PROJECT_DIR)/Tweaks \
--I$(THEOS_PROJECT_DIR)/Tweaks/RemoteLog \
--I$(THEOS_PROJECT_DIR)/Tweaks/FixHeaders
+export ADDITIONAL_CFLAGS = -I$(THEOS_PROJECT_DIR)/Tweaks -I$(THEOS_PROJECT_DIR)/Tweaks/RemoteLog -I$(THEOS_PROJECT_DIR)/Tweaks/FixHeaders
+export ADDITIONAL_OBJCCFLAGS = -include $(THEOS_PROJECT_DIR)/Tweaks/FixHeaders/FixForward.h
 
 export ADDITIONAL_OBJCCFLAGS = \
 -include $(THEOS_PROJECT_DIR)/Tweaks/FixHeaders/FixForward.h
