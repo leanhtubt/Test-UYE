@@ -82,11 +82,14 @@ before-package::
 endif
 
 after-stage::
-	@echo "===> Patching Info.plist (Local Network for Cast)..."
+	@echo "===> DEBUG: Kiểm tra thư mục Staging..."
+	@echo "Staging dir: $(THEOS_STAGING_DIR)"
+	@ls $(THEOS_STAGING_DIR)/Applications/ || echo "Không tìm thấy Applications"
 
+	@echo "===> Patching Info.plist (Local Network for Cast)..."
 	PLIST="$(THEOS_STAGING_DIR)/Applications/YouTube.app/Info.plist"; \
 	if [ -f "$$PLIST" ]; then \
-		echo "Found Info.plist at $$PLIST"; \
+		echo "Found $$PLIST"; \
 		\
 		/usr/libexec/PlistBuddy -c "Print :NSLocalNetworkUsageDescription" "$$PLIST" >/dev/null 2>&1 || \
 		/usr/libexec/PlistBuddy -c "Add :NSLocalNetworkUsageDescription string 'Allow access to local network for casting'" "$$PLIST"; \
@@ -94,13 +97,13 @@ after-stage::
 		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$$PLIST" >/dev/null 2>&1 || \
 		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices array" "$$PLIST"; \
 		\
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices:0" "$$PLIST" >/dev/null 2>&1 || \
+		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$$PLIST" | grep -q "_googlecast._tcp" || \
 		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:0 string _googlecast._tcp" "$$PLIST"; \
 		\
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices:1" "$$PLIST" >/dev/null 2>&1 || \
+		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$$PLIST" | grep -q "_googlezone._tcp" || \
 		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:1 string _googlezone._tcp" "$$PLIST"; \
 		\
-		echo "Info.plist patched successfully."; \
+		echo "Info.plist patched OK"; \
 	else \
-		echo "ERROR: Info.plist not found! Check app path."; \
+		echo "ERROR: Không tìm thấy Info.plist tại $$PLIST"; \
 	fi
