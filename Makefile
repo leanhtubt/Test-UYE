@@ -49,6 +49,8 @@ $(TWEAK_NAME)_EMBED_FRAMEWORKS = $(_THEOS_LOCAL_DATA_DIR)/$(THEOS_OBJ_DIR_NAME)/
 $(TWEAK_NAME)_EMBED_BUNDLES = $(wildcard Bundles/*.bundle)
 $(TWEAK_NAME)_EMBED_EXTENSIONS = $(wildcard Extensions/*.appex)
 
+$(TWEAK_NAME)_CODESIGN_FLAGS = -Sentitlements.plist
+
 include $(THEOS)/makefiles/common.mk
 
 ifneq ($(JAILBROKEN),1)
