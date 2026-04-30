@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!-- Cast -->
+    <key>com.apple.developer.networking.multicast</key>
+    <true/>
+
+    <!-- (Optional) WiFi info -->
+    <key>com.apple.developer.networking.wifi-info</key>
+    <true/>
+
+    <!-- Login nâng cao -->
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.google.ios.youtube</string>
+        <string>$(AppIdentifierPrefix)com.google.common.SSO</string>
+    </array>
+
+    <!-- Universal links (có thể không hoạt động khi sideload) -->
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+        <string>applinks:youtube.com</string>
+        <string>applinks:m.youtube.com</string>
+        <string>applinks:youtu.be</string>
+    </array>
+
+</dict>
+</plist>
