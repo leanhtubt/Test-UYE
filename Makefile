@@ -82,25 +82,24 @@ before-package::
 endif
 
 after-stage::
-	@echo "===> DEBUG: Kiểm tra thư mục Staging..."
-	@ls $(THEOS_STAGING_DIR)/Applications/ || echo "Không tìm thấy Applications"
+	@echo "===> Đang tự động tìm vị trí Info.plist..."
+	$(eval INFO_PATH := $(shell find $(THEOS_STAGING_DIR) -name "Info.plist" | head -n 1))
+	$(eval APP_DIR := $(shell dirname "$(INFO_PATH)"))
 
-	@echo "===> Patching Info.plist (Local Network for Cast)..."
-	PLIST="$(THEOS_STAGING_DIR)/Applications/YouTube.app/Info.plist"; \
-	if [ -f "$$PLIST" ]; then \
-		echo "Found $$PLIST"; \
-		/usr/libexec/PlistBuddy -c "Print :NSLocalNetworkUsageDescription" "$$PLIST" >/dev/null 2>&1 || \
-		/usr/libexec/PlistBuddy -c "Add :NSLocalNetworkUsageDescription string 'Allow access to local network for casting'" "$$PLIST"; \
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$$PLIST" >/dev/null 2>&1 || \
-		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices array" "$$PLIST"; \
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$$PLIST" | grep -q "_googlecast._tcp" || \
-		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:0 string _googlecast._tcp" "$$PLIST"; \
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$$PLIST" | grep -q "_googlezone._tcp" || \
-		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:1 string _googlezone._tcp" "$$PLIST"; \
+	@if [ -f "$(INFO_PATH)" ]; then \
+		echo "Đã tìm thấy tại: $(INFO_PATH)"; \
+		/usr/libexec/PlistBuddy -c "Print :NSLocalNetworkUsageDescription" "$(INFO_PATH)" >/dev/null 2>&1 || \
+		/usr/libexec/PlistBuddy -c "Add :NSLocalNetworkUsageDescription string 'Allow access to local network for casting'" "$(INFO_PATH)"; \
+		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$(INFO_PATH)" >/dev/null 2>&1 || \
+		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices array" "$(INFO_PATH)"; \
+		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$(INFO_PATH)" | grep -q "_googlecast._tcp" || \
+		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:0 string _googlecast._tcp" "$(INFO_PATH)"; \
+		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$(INFO_PATH)" | grep -q "_googlezone._tcp" || \
+		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:1 string _googlezone._tcp" "$(INFO_PATH)"; \
 		echo "Info.plist patched OK"; \
+		\
+		echo "===> Ép file entitlements vào: $(APP_DIR)"; \
+		cp cyan.entitlements "$(APP_DIR)/cyan.entitlements"; \
 	else \
-		echo "ERROR: Không tìm thấy Info.plist tại $$PLIST"; \
+		echo "CẢNH BÁO: Vẫn không tìm thấy Info.plist. Kiểm tra lại cấu trúc file IPA."; \
 	fi
-
-	@echo "===> Ép file entitlements vào bộ cài giống Dan..."
-	@cp cyan.entitlements $(THEOS_STAGING_DIR)/Applications/YouTube.app/cyan.entitlements
