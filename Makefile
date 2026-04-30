@@ -38,18 +38,14 @@ $(TWEAK_NAME)_FILES := $(wildcard Sources/*.xm) $(wildcard Sources/*.x) $(wildca
 $(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation AVFoundation AVKit Photos Accelerate CoreMotion GameController VideoToolbox Security
 $(TWEAK_NAME)_LIBRARIES = bz2 c++ iconv z
 
-# Sửa lỗi chí mạng: Dùng dấu nháy đơn bảo vệ chuỗi phiên bản cho Clang
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc -Wno-deprecated-declarations -Wno-unused-but-set-variable -DTWEAK_VERSION='@"$(PACKAGE_VERSION)"'
 
-# Dồn dòng để tránh lỗi khoảng trắng (space) sau dấu gạch chéo (\)
 $(TWEAK_NAME)_INJECT_DYLIBS = Tweaks/uYou/Library/MobileSubstrate/DynamicLibraries/uYou.dylib $(THEOS_OBJ_DIR)/libFLEX.dylib $(THEOS_OBJ_DIR)/iSponsorBlock.dylib $(THEOS_OBJ_DIR)/YTABConfig.dylib $(THEOS_OBJ_DIR)/YTIcons.dylib $(THEOS_OBJ_DIR)/YouGroupSettings.dylib $(THEOS_OBJ_DIR)/YouLoop.dylib $(THEOS_OBJ_DIR)/YouMute.dylib $(THEOS_OBJ_DIR)/YouPiP.dylib $(THEOS_OBJ_DIR)/YouQuality.dylib $(THEOS_OBJ_DIR)/YouSlider.dylib $(THEOS_OBJ_DIR)/YouSpeed.dylib $(THEOS_OBJ_DIR)/YouTimeStamp.dylib $(THEOS_OBJ_DIR)/YouTubeDislikesReturn.dylib $(THEOS_OBJ_DIR)/DontEatMyContent.dylib $(THEOS_OBJ_DIR)/YTHoldForSpeed.dylib $(THEOS_OBJ_DIR)/YTUHD.dylib $(THEOS_OBJ_DIR)/YTVideoOverlay.dylib $(THEOS_OBJ_DIR)/YTweaks.dylib $(THEOS_OBJ_DIR)/ShareFix.dylib
 
 $(TWEAK_NAME)_EMBED_LIBRARIES = $(THEOS_OBJ_DIR)/libcolorpicker.dylib
 $(TWEAK_NAME)_EMBED_FRAMEWORKS = $(_THEOS_LOCAL_DATA_DIR)/$(THEOS_OBJ_DIR_NAME)/install_Alderis.xcarchive/Products/var/jb/Library/Frameworks/Alderis.framework
 $(TWEAK_NAME)_EMBED_BUNDLES = $(wildcard Bundles/*.bundle)
 $(TWEAK_NAME)_EMBED_EXTENSIONS = $(wildcard Extensions/*.appex)
-
-$(TWEAK_NAME)_CODESIGN_FLAGS = -Sentitlements.plist
 
 include $(THEOS)/makefiles/common.mk
 
@@ -80,26 +76,3 @@ before-package::
 	mkdir -p "$(THEOS_STAGING_DIR)/Library/Application Support"
 	cp -r Localizations/uYouPlus.bundle "$(THEOS_STAGING_DIR)/Library/Application Support/"
 endif
-
-after-stage::
-	@echo "===> Đang tự động tìm vị trí Info.plist..."
-	$(eval INFO_PATH := $(shell find $(THEOS_STAGING_DIR) -name "Info.plist" | head -n 1))
-	$(eval APP_DIR := $(shell dirname "$(INFO_PATH)"))
-
-	@if [ -f "$(INFO_PATH)" ]; then \
-		echo "Đã tìm thấy tại: $(INFO_PATH)"; \
-		/usr/libexec/PlistBuddy -c "Print :NSLocalNetworkUsageDescription" "$(INFO_PATH)" >/dev/null 2>&1 || \
-		/usr/libexec/PlistBuddy -c "Add :NSLocalNetworkUsageDescription string 'Allow access to local network for casting'" "$(INFO_PATH)"; \
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$(INFO_PATH)" >/dev/null 2>&1 || \
-		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices array" "$(INFO_PATH)"; \
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$(INFO_PATH)" | grep -q "_googlecast._tcp" || \
-		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:0 string _googlecast._tcp" "$(INFO_PATH)"; \
-		/usr/libexec/PlistBuddy -c "Print :NSBonjourServices" "$(INFO_PATH)" | grep -q "_googlezone._tcp" || \
-		/usr/libexec/PlistBuddy -c "Add :NSBonjourServices:1 string _googlezone._tcp" "$(INFO_PATH)"; \
-		echo "Info.plist patched OK"; \
-		\
-		echo "===> Ép file entitlements vào: $(APP_DIR)"; \
-		cp cyan.entitlements "$(APP_DIR)/cyan.entitlements"; \
-	else \
-		echo "CẢNH BÁO: Vẫn không tìm thấy Info.plist. Kiểm tra lại cấu trúc file IPA."; \
-	fi
